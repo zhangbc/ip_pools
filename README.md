@@ -55,3 +55,15 @@ ip_carrier表：
 	  `carrieroperator` varchar(20) DEFAULT NULL COMMENT '运营商',
 	  PRIMARY KEY (`id`)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IP运营商信息';
+
+ip_log_info表：
+
+	CREATE TABLE `ip_log_info` (
+	  `id` int(15) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增列',
+		`ip_range` varchar(15) NOT NULL COMMENT 'IP段(AB)',
+	  `city_count` int(10) DEFAULT NULL COMMENT '归属地个数',
+		`city_finished` char(2) DEFAULT '否' COMMENT '归属地是否完成',
+		`carrier_count` int(10) DEFAULT NULL COMMENT '运营商个数',
+		`carrier_finished` char(2) DEFAULT '否' COMMENT '运营商是否完成',
+	  PRIMARY KEY (`id`)
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IP采集信息统计进度表';

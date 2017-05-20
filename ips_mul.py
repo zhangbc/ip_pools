@@ -26,7 +26,7 @@ def save(sql):
     """
 
     try:
-        conn = cymysql.connect(host='192.168.1.124', user='root', passwd='zbc12300',
+        conn = cymysql.connect(host='192.168.0.102', user='root', passwd='zbc12300',
                                db='scrapy_task', port=3306, charset='utf8')
         cur = conn.cursor()
         cur.execute(sql)
@@ -128,7 +128,7 @@ def main():
     """
 
     pool = multiprocessing.Pool(processes=settings.PROCESSES)
-    ips = get_ips(1, 10, 0, 0)
+    ips = get_ips(1, 18, 0, 0)
     for ip in ips:
         try:
             pool.apply_async(get_ip_info, (ip,))

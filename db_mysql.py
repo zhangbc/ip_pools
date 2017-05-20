@@ -12,7 +12,7 @@ import cymysql
 import settings
 
 
-class MysqlDB:
+class MysqlDB(object):
     """
     操作MySQL的类
     """
@@ -54,7 +54,7 @@ class MysqlDB:
 
     def exec_query(self, sql):
         """
-        执行查询语句，返回结果集
+        执行select查询语句，返回结果集
         :param sql: 要执行的SQL语句
         :return:
         """
@@ -88,23 +88,26 @@ class MysqlDB:
         cur.close()
         self.conn.close()
 
-    def get_total_ips(self):
-        """
-        统计已入库的IP总数
-        :return:
-        """
+    # def get_total_ips(self):
+    #     """
+    #     统计已入库的IP总数
+    #     :return:
+    #     """
+    #
+    #     query_sql = 'SELECT COUNT(1) counts FROM ip_info;'
+    #     result = self.exec_query(query_sql)
+    #     return result[0][0]
+    #
+    # def get_count_by_group(self):
+    #     """
+    #     按照IP的AB段分类统计
+    #     :return:
+    #     """
+    #
+    #     query_sql = 'SELECT SUBSTRING_INDEX(ip,\'.\',2) ips, COUNT(1) counts ' \
+    #                 'FROM ip_info GROUP BY SUBSTRING_INDEX(ip,\'.\',2);'
+    #     result = self.exec_query(query_sql)
+    #     return result
 
-        query_sql = 'SELECT COUNT(1) counts FROM ip_info;'
-        result = self.exec_query(query_sql)
-        return result[0][0]
 
-    def get_count_by_group(self):
-        """
-        按照IP的AB段分类统计
-        :return:
-        """
-
-        query_sql = 'SELECT SUBSTRING_INDEX(ip,\'.\',2) ips, COUNT(1) counts ' \
-                    'FROM ip_info GROUP BY SUBSTRING_INDEX(ip,\'.\',2);'
-        result = self.exec_query(query_sql)
-        return result
+# print MysqlDB().get_total_ips()
