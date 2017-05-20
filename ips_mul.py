@@ -123,11 +123,11 @@ def get_ips(ia, ib, ic, ie):
 
 def main():
     """
-    实现主体函数，多进程
+    实现函数, work
     :return:
     """
 
-    pool = multiprocessing.Pool(processes=10)
+    pool = multiprocessing.Pool(processes=settings.PROCESSES)
     ips = get_ips(1, 10, 0, 0)
     for ip in ips:
         try:
