@@ -43,7 +43,7 @@ class IpProcessor(MysqlDB):
     def update_sql(self, sql):
         """
         执行查询语句，如Create,Insert,Delete,update,drop等。
-        :param sql: 要执行的SQL语句
+        :param sql:
         :return:
         """
 
@@ -52,20 +52,22 @@ class IpProcessor(MysqlDB):
     def query_sql(self, sql):
         """
         执行select查询语句，返回结果集
-        :param sql: 要执行的SQL语句
+        :param sql:
         :return:
         """
 
         rows = MysqlDB.exec_query(self, sql)
         return rows
 
-    def get_ip_by_condition(self, condition):
+    def get_ip_by_condition(self, columns, condition):
         """
         通过条件查询IP信息
-        :param condition: 查询条件
+        :param columns:
+        :param condition: 查询条件, 如：‘and ip like ‘1.1.%’’
         :return:
         """
 
-        sql = "SELECT * FROM ip_info where 1=1 {condition};".format(condition=condition)
+        sql = "SELECT {columns} FROM ip_info where 1=1 {condition};"\
+            .format(columns=columns, condition=condition)
         rows = self.exec_query(sql)
         return rows

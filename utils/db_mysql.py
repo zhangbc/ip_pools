@@ -64,7 +64,7 @@ class MysqlDB(object):
             cur.execute(sql)
             rows = cur.fetchall()
         except cymysql.MySQLError, ex:
-            print 'MySQL.Error :%s \ns' % (str(ex[0]), str(ex[1]))
+            print 'MySQL.Error :%s \n%s' % (str(ex[0]), str(ex[1]))
             sys.exit()
 
         cur.close()

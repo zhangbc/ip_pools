@@ -2,32 +2,51 @@
 # coding: utf-8
 
 """
-将ip_info中归中属地和运营商信息提取并写入对应的表
+将ip_info中归中属地和运营商信息
+提取并写入对应的表
 author:         zhangbc
 create_time:    2017-05-19
 """
 
 import sys
 import time
-from db_mysql import MysqlDB
+from utils.ip_processor import IpProcessor
 
 
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-class UpdateCites(object):
+class UpdateCityCarrier(IpProcessor):
     """
     将ip_info中归中属地和运营商信息提取并写入对应的表
     """
 
     def __init__(self):
-        self.mysql = MysqlDB()
+        IpProcessor.__init__(self)
 
     def update_city(self):
-        pass
+        """
+        更新ip_city信息
+        :return:
+        """
+        columns = 'distinct addr'
+        condition = 'and ip like \'1.10.%\''
+        data = self.get_ip_by_condition(columns=columns, condition=condition)
+
+        if len(data):
+            for index, dt in enumerate(data):
+                print dt[0]
+
+            print u''.join(['(\'{0}\'),'.format(dt[0]) for dt in data])[:-1]
+
+        # insert_sql = 'insert into ip_city(city) VALUES {0}'.format(data)
 
     def update_carrier(self):
+        """
+
+        :return:
+        """
         pass
 
     def get_count(self, flag):
@@ -38,10 +57,10 @@ class UpdateCites(object):
         """
 
         if flag == 0:
-            result = self.mysql.get_total_ips()
+            result = self.get_total_ips()
             print result
         elif flag == 1:
-            result = self.mysql.get_count_by_group()
+            result = self.get_count_by_group()
             for index, row in enumerate(result):
                 print row[0], row[1]
         else:
@@ -55,8 +74,8 @@ def main():
     :return:
     """
 
-    update_city = UpdateCites()
-    update_city.get_count(1)
+    updates = UpdateCityCarrier()
+    updates.update_city()
 
 
 if __name__ == '__main__':

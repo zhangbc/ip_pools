@@ -15,7 +15,7 @@ import re
 import time
 import multiprocessing
 import settings
-from ip_processor import IpProcessor
+from utils.ip_processor import IpProcessor
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -120,7 +120,7 @@ class CrawlIPs(IpProcessor):
         """
 
         ips = self.get_ips(ia, ib, 0, 0)
-        rows = self.get_ip_by_condition('and ip like \'{ia}.{ib}.%\';'.format(ia=ia, ib=ib))
+        rows = self.get_ip_by_condition('*', 'and ip like \'{ia}.{ib}.%\';'.format(ia=ia, ib=ib))
         ips_data = [row[1] for row in rows]
         deletion_ips = list(set(ips).difference(set(ips_data)))
         return deletion_ips
