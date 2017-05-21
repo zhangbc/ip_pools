@@ -39,31 +39,31 @@ class UpdateCityCarrier(IpProcessor):
                             '''WHERE addr NOT IN (SELECT city FROM ip_city) '''
                             '''AND {0};'''.format(condition))
         row_count = self.exec_no_query(insert_city_sql)
-
+        if row_count:
+            print u'表ip_city已插入{0}条记录！'.format(row_count)
+            
+        # 更新成功，写入log
         query_city_sql = (r'''SELECT DISTINCT addr FROM ip_info '''
                            '''WHERE {0};'''.format(condition))
         city_count = len(self.exec_query(query_city_sql))
 
-        # 更新成功，写入log
-        if row_count:
-            condition_log = 'WHERE ip_range = \'{0}.{1}.x.x\''.format(ia, ib)
-            query_sql = r'SELECT * FROM ip_log_info {0};'.format(condition_log)
-            rows = self.exec_query(query_sql)
+        condition_log = 'WHERE ip_range = \'{0}.{1}.x.x\''.format(ia, ib)
+        query_sql = r'SELECT * FROM ip_log_info {0};'.format(condition_log)
+        rows = self.exec_query(query_sql)
 
-            if len(rows):
-                update_log_sql = (r'''UPDATE ip_log_info SET city_count={0}, '''
-                                   '''city_finished=\'Y\' {1}''').format(city_count, condition_log)
-                update_log_rows = self.exec_no_query(update_log_sql)
-                print u'表ip_log_info已更新{0}条记录！'.format(update_log_rows)
-            else:
-                insert_log_sql = ('INSERT INTO ip_log_info('
-                                  'ip_range, city_count, city_finished, '
-                                  'carrier_count, carrier_finished) VALUES '
-                                  '(\'{0}.{1}.x.x\',{2},\'Y\',0,\'N\')').format(ia, ib, city_count)
-                insert_log_rows = self.exec_no_query(insert_log_sql)
-                print u'表ip_log_info已插入{0}条记录！'.format(insert_log_rows)
+        if len(rows):
+            update_log_sql = (r'''UPDATE ip_log_info SET city_count={0}, '''
+                               '''city_finished=\'Y\' {1}''').format(city_count, condition_log)
+            update_log_rows = self.exec_no_query(update_log_sql)
+            print u'表ip_log_info已更新{0}条记录！'.format(update_log_rows)
+        else:
+            insert_log_sql = ('INSERT INTO ip_log_info('
+                              'ip_range, city_count, city_finished, '
+                              'carrier_count, carrier_finished) VALUES '
+                              '(\'{0}.{1}.x.x\',{2},\'Y\',0,\'N\')').format(ia, ib, city_count)
+            insert_log_rows = self.exec_no_query(insert_log_sql)
+            print u'表ip_log_info已插入{0}条记录！'.format(insert_log_rows)
 
-            print u'表ip_city已插入{0}条记录！'.format(row_count)
 
     def update_carrier(self, ia, ib):
         """
@@ -79,31 +79,31 @@ class UpdateCityCarrier(IpProcessor):
                                '''WHERE carrieroperator NOT IN (SELECT carrieroperator FROM ip_carrier) '''
                                '''AND {0};'''.format(condition))
         row_count = self.exec_no_query(insert_carrier_sql)
+        if row_count:
+            print u'表ip_carrier已插入{0}条记录！'.format(row_count)
 
+        # 更新成功，写入log
         query_carrier_sql = (r'''SELECT DISTINCT carrieroperator FROM ip_info '''
                               '''WHERE {0};'''.format(condition))
         rows = self.exec_query(query_carrier_sql)
         carrier_count = len(rows)-1 if ('',) in rows else len(rows)
 
-        # 更新成功，写入log
-        if row_count:
-            condition_log = 'WHERE ip_range = \'{0}.{1}.x.x\''.format(ia, ib)
-            query_sql = r'SELECT * FROM ip_log_info {0};'.format(condition_log)
-            rows = self.exec_query(query_sql)
-            if len(rows):
-                update_log_sql = (r'''UPDATE ip_log_info SET carrier_count={0}, '''
-                                   '''carrier_finished=\'Y\' {1}''').format(carrier_count, condition_log)
-                update_log_rows = self.exec_no_query(update_log_sql)
-                print u'表ip_log_info已更新{0}条记录！'.format(update_log_rows)
-            else:
-                insert_log_sql = (r'''INSERT INTO ip_log_info('''
-                                   '''ip_range, city_count, city_finished, '''
-                                   '''carrier_count, carrier_finished) VALUES '''
-                                   '''(\'{0}.{1}.x.x\',0,\'N\',{2},\'Y\')''').format(ia, ib, carrier_count)
-                insert_log_rows = self.exec_no_query(insert_log_sql)
-                print u'表ip_log_info已插入{0}条记录！'.format(insert_log_rows)
+        condition_log = 'WHERE ip_range = \'{0}.{1}.x.x\''.format(ia, ib)
+        query_sql = r'SELECT * FROM ip_log_info {0};'.format(condition_log)
+        rows = self.exec_query(query_sql)
+        if len(rows):
+            update_log_sql = (r'''UPDATE ip_log_info SET carrier_count={0}, '''
+                               '''carrier_finished=\'Y\' {1}''').format(carrier_count, condition_log)
+            update_log_rows = self.exec_no_query(update_log_sql)
+            print u'表ip_log_info已更新{0}条记录！'.format(update_log_rows)
+        else:
+            insert_log_sql = (r'''INSERT INTO ip_log_info('''
+                               '''ip_range, city_count, city_finished, '''
+                               '''carrier_count, carrier_finished) VALUES '''
+                               '''(\'{0}.{1}.x.x\',0,\'N\',{2},\'Y\')''').format(ia, ib, carrier_count)
+            insert_log_rows = self.exec_no_query(insert_log_sql)
+            print u'表ip_log_info已插入{0}条记录！'.format(insert_log_rows)
 
-            print u'表ip_carrier已插入{0}条记录！'.format(row_count)
 
     def get_updated_list(self):
         """
