@@ -95,7 +95,7 @@ class CrawlIPs(IpProcessor):
         if ib > 0:
             ib = xrange(ib, ib+1)
         else:
-            ib = radix
+            ib = [0]
 
         if ic > 0:
             ic = xrange(ic, ic+1)
@@ -131,7 +131,7 @@ class CrawlIPs(IpProcessor):
         """
 
         ia = 1
-        ib = 18
+        ib = 0
         while True:
             ips = self.get_deletion_ips(ia, ib)
             if not len(ips):
