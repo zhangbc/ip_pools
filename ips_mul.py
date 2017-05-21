@@ -123,12 +123,12 @@ def get_ips(ia, ib, ic, ie):
 
 def main():
     """
-    函数实现
+    实现函数, work
     :return:
     """
 
     pool = multiprocessing.Pool(processes=settings.PROCESSES)
-    ips = get_ips(1, 18, 0, 0)
+    ips = get_ips(1, 10, 0, 0)
     for ip in ips:
         try:
             pool.apply_async(get_ip_info, (ip,))

@@ -135,6 +135,7 @@ class CrawlIPs(IpProcessor):
         while True:
             ips = self.get_deletion_ips(ia, ib)
             if not len(ips):
+                print u'-------{0}.{1}.x.x段没有待抓取--------'.format(ia, ib)
                 break
 
             print u'-------{0}.{1}.x.x段共有{2}个IP待抓取--------'.format(ia, ib, len(ips))
