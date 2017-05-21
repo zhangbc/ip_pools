@@ -8,7 +8,7 @@
 - 采集IP信息，入库MYSQL，并作分析
 - 多进程（已完成）
 - scrapy框架
-
+- 完成归属地及其运营商的信息入库，并记录日志（2017-05-21）
 
 ## 相关SQL语句 ##
 - 查询总记录数
@@ -25,7 +25,6 @@ GROUP BY SUBSTRING_INDEX(ip,'.',2);`
 ![findall_bug](http://i.imgur.com/UjBH0PY.png)
 应该匹配第一个结果结果值.
 
-2. 完成归属地及其运营商的信息入库，并记录日志（2017-05-21）
 
 # scrapy_task数据库说明 #
 
