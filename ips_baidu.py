@@ -131,7 +131,7 @@ class CrawlIPs(IpProcessor):
         """
 
         ia = 1
-        ib = 17
+        ib = 18
         while True:
             ips = self.get_deletion_ips(ia, ib)
             if not len(ips):
