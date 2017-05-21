@@ -66,9 +66,10 @@ class MysqlDB(object):
         except cymysql.MySQLError, ex:
             print 'MySQL.Error :%s \n%s' % (str(ex[0]), str(ex[1]))
             sys.exit()
+        finally:
+            cur.close()
+            self.conn.close()
 
-        cur.close()
-        self.conn.close()
         return rows
 
     def exec_no_query(self, sql):
@@ -79,35 +80,16 @@ class MysqlDB(object):
         """
 
         cur = self.__connect__()
+        row_count = 0  # 更新/插入受影响的行数
         try:
             cur.execute(sql)
             self.conn.commit()
+            row_count = cur.rowcount
         except cymysql.MySQLError, ex:
             print 'MySQL.Error :%s %s' % (str(ex[0]), str(ex[1]))
-            sys.exit()
-        cur.close()
-        self.conn.close()
+            self.conn.rollback()
+        finally:
+            cur.close()
+            self.conn.close()
 
-    # def get_total_ips(self):
-    #     """
-    #     统计已入库的IP总数
-    #     :return:
-    #     """
-    #
-    #     query_sql = 'SELECT COUNT(1) counts FROM ip_info;'
-    #     result = self.exec_query(query_sql)
-    #     return result[0][0]
-    #
-    # def get_count_by_group(self):
-    #     """
-    #     按照IP的AB段分类统计
-    #     :return:
-    #     """
-    #
-    #     query_sql = 'SELECT SUBSTRING_INDEX(ip,\'.\',2) ips, COUNT(1) counts ' \
-    #                 'FROM ip_info GROUP BY SUBSTRING_INDEX(ip,\'.\',2);'
-    #     result = self.exec_query(query_sql)
-    #     return result
-
-
-# print MysqlDB().get_total_ips()
+        return row_count
