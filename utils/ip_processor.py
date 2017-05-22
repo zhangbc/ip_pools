@@ -71,3 +71,53 @@ class IpProcessor(MysqlDB):
             .format(columns=columns, condition=condition)
         rows = self.exec_query(sql)
         return rows
+
+    @staticmethod
+    def get_ips(ia, ib, ic, ie):
+        """
+        获取批量IP地址
+        :param ia: IP地址的A段, 若为0，则1~255
+        :param ib: IP地址的B段, 若为0，则0~255
+        :param ic: IP地址的C段, 若为0，则0~255
+        :param ie: IP地址的D段, 若为0，则0~255
+        :return:
+        """
+
+        radix = xrange(0, 256)
+        if ia > 0:
+            ia = xrange(ia, ia+1)
+        else:
+            ia = [i for i in radix if i > 0]
+
+        if ib > 0:
+            ib = xrange(ib, ib+1)
+        else:
+            ib = radix
+
+        if ic > 0:
+            ic = xrange(ic, ic+1)
+        else:
+            ic = radix
+
+        if ie > 0:
+            ie = xrange(ie, ie+1)
+        else:
+            ie = radix
+
+        ips = [str(x)+"."+str(y)+"."+str(m)+"."+str(n)
+               for x in ia for y in ib for m in ic for n in ie]
+        return ips
+
+    def get_deletion_ips(self, ia, ib):
+        """
+        获取缺失的IP(爬漏检查)
+        :param ia: IP的A段
+        :param ib: IP的B段
+        :return:
+        """
+
+        ips = self.get_ips(ia, ib, 0, 0)
+        rows = self.get_ip_by_condition('*', 'and ip like \'{ia}.{ib}.%\';'.format(ia=ia, ib=ib))
+        ips_data = [row[1] for row in rows]
+        deletion_ips = list(set(ips).difference(set(ips_data)))
+        return deletion_ips

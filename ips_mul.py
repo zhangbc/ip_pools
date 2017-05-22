@@ -16,9 +16,10 @@ import time
 import multiprocessing
 import cymysql
 import settings
+from utils.ip_processor import IpProcessor
 
 
-def save(sql):
+def save_to_mysql(sql):
     """
     将采集到的Ip信息入库操作
     :param sql: SQL语句
@@ -26,8 +27,9 @@ def save(sql):
     """
 
     try:
-        conn = cymysql.connect(host='192.168.0.102', user='root', passwd='zbc12300',
-                               db='scrapy_task', port=3306, charset='utf8')
+        conn = cymysql.connect(host=settings.MYSQL_HOST, user=settings.MYSQL_USER,
+                               passwd=settings.MYSQL_PASSWD, db=settings.MYSQL_DBNAME,
+                               port=settings.MYSQL_PORT, charset=settings.MYSQL_CHARSET)
         cur = conn.cursor()
         cur.execute(sql)
         conn.commit()
@@ -69,7 +71,7 @@ def get_ip_info(ip):
     if not data or data[0][0] != ip:
         data = re.findall(rex2, contents)
 
-    if data and re.findall(rex3, data[0][0]):  # 必须是合法IP才记录,否则记录Errorlog
+    if data and re.findall(rex3, data[0][0]):
         ip_dict = dict()
         ip_dict["ip"] = data[0][0]
         ip_dict["addr"] = data[0][1]
@@ -79,46 +81,10 @@ def get_ip_info(ip):
             ip_dict["carrier"] = ""
 
         insert_sql = 'insert into ip_info(ip, addr, carrieroperator) VALUES ' \
-              '(\'%(ip)s\', \'%(addr)s\', \'%(carrier)s\')' % ip_dict
-        save(sql=insert_sql)
+                     '(\'%(ip)s\', \'%(addr)s\', \'%(carrier)s\')' % ip_dict
+        save_to_mysql(sql=insert_sql)
 
-    time.sleep(1)
-
-
-def get_ips(ia, ib, ic, ie):
-    """
-    获取批量IP地址
-    :param ia: IP地址的A段, 若为0，则0~255
-    :param ib: IP地址的B段, 若为0，则0~255
-    :param ic: IP地址的C段, 若为0，则0~255
-    :param ie: IP地址的D段, 若为0，则0~255
-    :return: 返回IP值数组
-    """
-
-    radix = xrange(0, 256)
-    if ia > 0:
-        ia = xrange(ia, ia+1)
-    else:
-        ia = [i for i in radix if i > 0]
-
-    if ib > 0:
-        ib = xrange(ib, ib+1)
-    else:
-        ib = radix
-
-    if ic > 0:
-        ic = xrange(ic, ic+1)
-    else:
-        ic = radix
-
-    if ie > 0:
-        ie = xrange(ie, ie+1)
-    else:
-        ie = radix
-
-    ips = [str(x)+"."+str(y)+"."+str(m)+"."+str(n)
-           for x in ia for y in ib for m in ic for n in ie]
-    return ips
+    time.sleep(random.uniform(0, 1))
 
 
 def main():
@@ -128,12 +94,11 @@ def main():
     """
 
     pool = multiprocessing.Pool(processes=settings.PROCESSES)
-    ips = get_ips(1, 10, 0, 0)
+    ips = IpProcessor().get_deletion_ips(1, 19)
     for ip in ips:
         try:
             pool.apply_async(get_ip_info, (ip,))
-        except Exception as ex:
-            print ex
+        except multiprocessing.ProcessError:
             pass
 
     pool.close()

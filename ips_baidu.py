@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-多进程抓取IP归属地并入库MYSQL
+抓取IP归属地并入库MYSQL
 author:         zhangbc
 last modify:    2017-04-26
 """
@@ -13,7 +13,6 @@ import random
 import requests
 import re
 import time
-import multiprocessing
 import settings
 from utils.ip_processor import IpProcessor
 
@@ -73,61 +72,11 @@ class CrawlIPs(IpProcessor):
                          '(\'%(ip)s\', \'%(addr)s\', \'%(carrier)s\')' % ip_dict
 
             self.exec_no_query(sql=insert_sql)
-        time.sleep(1)
+        time.sleep(random.uniform(0, 1))
 
-    @staticmethod
-    def get_ips(ia, ib, ic, ie):
+    def work(self):
         """
-        获取批量IP地址
-        :param ia: IP地址的A段, 若为0，则0~255
-        :param ib: IP地址的B段, 若为0，则0~255
-        :param ic: IP地址的C段, 若为0，则0~255
-        :param ie: IP地址的D段, 若为0，则0~255
-        :return: 返回IP值数组
-        """
-
-        radix = xrange(0, 256)
-        if ia > 0:
-            ia = xrange(ia, ia+1)
-        else:
-            ia = [i for i in radix if i > 0]
-
-        if ib > 0:
-            ib = xrange(ib, ib+1)
-        else:
-            ib = [0]
-
-        if ic > 0:
-            ic = xrange(ic, ic+1)
-        else:
-            ic = radix
-
-        if ie > 0:
-            ie = xrange(ie, ie+1)
-        else:
-            ie = radix
-
-        ips = [str(x)+"."+str(y)+"."+str(m)+"."+str(n)
-               for x in ia for y in ib for m in ic for n in ie]
-        return ips
-
-    def get_deletion_ips(self, ia, ib):
-        """
-        获取缺失的IP(爬漏检查)
-        :param ia: IP的A段
-        :param ib: IP的B段
-        :return:
-        """
-
-        ips = self.get_ips(ia, ib, 0, 0)
-        rows = self.get_ip_by_condition('*', 'and ip like \'{ia}.{ib}.%\';'.format(ia=ia, ib=ib))
-        ips_data = [row[1] for row in rows]
-        deletion_ips = list(set(ips).difference(set(ips_data)))
-        return deletion_ips
-
-    def crawl_ip_info(self):
-        """
-        采集数据
+        采集数据,work
         """
 
         ia = 1
@@ -146,33 +95,22 @@ class CrawlIPs(IpProcessor):
 
 def main():
     """
-    实现主体函数，多进程
+    实现函数
     :return:
     """
 
     crawl_ips = CrawlIPs()
     print u'--------请输入要运行的程序编号--------\n' \
-          u'1：多进程采集；\n2：查询；\n3：检查爬漏IP\n' \
+          u'1：IP信息采集；\n2：查询；\n3：检查爬漏IP\n' \
           u'---------------------------------------\n'
     number = sys.argv[1]
     print u'您正在运行的程序编号为：{0}'.format(number)
 
     if number == "1":
-        crawl_ips.crawl_ip_info()
+        crawl_ips.work()
         print 'Done!'
-        # pool = multiprocessing.Pool(processes=settings.PROCESSES)
-        # ips = crawl_ips.get_deletion_ips(1, 1)
-        # print ips
-        # for ip in ips:
-        #     try:
-        #         pool.apply_async(crawl_ips.get_ip_info, (ip,))
-        #     except Exception as ex:
-        #         print ex
-        #
-        # pool.close()
-        # pool.join()
     elif number == "2":
-        rows = crawl_ips.get_ip_by_condition('and ip like \'1.8.%\' limit 1;')
+        rows = crawl_ips.get_ip_by_condition('*', 'and ip like \'1.8.%\';')
         print len(rows)
     elif number == "3":
         crawl_ips.get_deletion_ips(1, 3)
