@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-抓取IP归属地并入库MYSQL
+抓取IP归属地并入库MYSQL, 在类中应用多进程
 author:         zhangbc
 last modify:    2017-04-26
 """
@@ -13,6 +13,7 @@ import random
 import requests
 import re
 import time
+import multiprocessing
 import settings
 from utils.ip_processor import IpProcessor
 
@@ -20,15 +21,16 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-class CrawlIPs(IpProcessor):
+class CrawlIPs(object):
     """
     采集IP信息入库
     """
 
-    def __init__(self):
-        IpProcessor.__init__(self)
+    def __init__(self, func):
+        self.func = func
 
-    def get_ip_info(self, ip):
+    @staticmethod
+    def get_ip_info(ip):
         """
         从百度获取IP的地址信息
         :param ip:
@@ -71,7 +73,7 @@ class CrawlIPs(IpProcessor):
             insert_sql = 'insert into ip_info(ip, addr, carrieroperator) VALUES ' \
                          '(\'%(ip)s\', \'%(addr)s\', \'%(carrier)s\')' % ip_dict
 
-            self.exec_no_query(sql=insert_sql)
+            IpProcessor().exec_no_query(sql=insert_sql)
         time.sleep(random.uniform(0, 1))
 
     def work(self):
@@ -80,17 +82,37 @@ class CrawlIPs(IpProcessor):
         """
 
         ia = 1
-        ib = 19
+        ib = 20
+
         while True:
-            ips = self.get_deletion_ips(ia, ib)
+            ips = IpProcessor().get_deletion_ips(ia, ib)
             if not len(ips):
                 print u'-------{0}.{1}.x.x段没有待抓取--------'.format(ia, ib)
                 break
 
+            pool = multiprocessing.Pool(processes=settings.PROCESSES)
             print u'-------{0}.{1}.x.x段共有{2}个IP待抓取--------'.format(ia, ib, len(ips))
             print 'Begin:' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
             for ip in ips:
-                self.get_ip_info(ip)
+                try:
+                    pool.apply_async(self.func, (self, ip,))
+                except multiprocessing.ProcessError:
+                    pass
+
+            pool.close()
+            pool.join()
+
+
+def work_wrap(instance, ip):
+    """
+    用一个可被实例化的普通函数包装类方法，
+    将实例对象作为参数传递给函数即可。
+    :param instance:
+    :param ip:
+    :return:
+    """
+
+    return instance.get_ip_info(ip)
 
 
 def main():
@@ -99,24 +121,8 @@ def main():
     :return:
     """
 
-    crawl_ips = CrawlIPs()
-    print u'--------请输入要运行的程序编号--------\n' \
-          u'1：IP信息采集；\n2：查询；\n3：检查爬漏IP\n' \
-          u'---------------------------------------\n'
-    number = sys.argv[1]
-    print u'您正在运行的程序编号为：{0}'.format(number)
-
-    if number == "1":
-        crawl_ips.work()
-        print 'Done!'
-    elif number == "2":
-        rows = crawl_ips.get_ip_by_condition('*', 'and ip like \'1.8.%\';')
-        print len(rows)
-    elif number == "3":
-        crawl_ips.get_deletion_ips(1, 3)
-    else:
-        print u'输入有误，请检查！'
-
+    crawl_ips = CrawlIPs(work_wrap)
+    crawl_ips.work()
 
 if __name__ == '__main__':
 

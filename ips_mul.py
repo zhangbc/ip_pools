@@ -87,28 +87,34 @@ def get_ip_info(ip):
     time.sleep(random.uniform(0, 1))
 
 
-def main():
+def work(ia, ib):
     """
     实现函数, work
     :return:
     """
 
     pool = multiprocessing.Pool(processes=settings.PROCESSES)
-    ips = IpProcessor().get_deletion_ips(1, 19)
-    for ip in ips:
-        try:
-            pool.apply_async(get_ip_info, (ip,))
-        except multiprocessing.ProcessError:
-            pass
+    while True:
+        ips = IpProcessor().get_deletion_ips(ia, ib)
+        if not len(ips):
+            print u'-------{0}.{1}.x.x段没有待抓取--------'.format(ia, ib)
+            break
 
-    pool.close()
-    pool.join()
+        print u'-------{0}.{1}.x.x段共有{2}个IP待抓取--------'.format(ia, ib, len(ips))
+        for ip in ips:
+            try:
+                pool.apply_async(get_ip_info, (ip,))
+            except multiprocessing.ProcessError:
+                pass
+
+        pool.close()
+        pool.join()
 
 
 if __name__ == '__main__':
 
     start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
     print 'Begin:' + start_time
-    main()
+    work(1, 20)
     end_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
     print 'End:%s' % end_time
